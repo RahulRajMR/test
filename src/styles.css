@@ -28,7 +28,7 @@
   }
    */
 
-  #tooltip {
+  /* #tooltip {
    position: fixed;
    left: 0;
    top: 0;
@@ -44,4 +44,4 @@
    transition: opacity 0.25s linear;
    border-radius: 3px;
    color: #ffffff;
- }
+ } */

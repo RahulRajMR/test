@@ -5,8 +5,8 @@ import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader'
 
 
 // let autoRotate = true;
-
-
+const totalGroup = new THREE.Group(); 
+const raycaster = new THREE.Raycaster();
 
 let scene, camera, renderer;
 
@@ -55,6 +55,25 @@ function init() {
 
 
 
+
+//   geometryObj.forEach(data => {
+
+//     var color =  "#" + Math.floor(Math.random()*16777215).toString(16);
+//     const geometry = data.obj;
+//     const material = new THREE.MeshPhongMaterial( { color: color, side: THREE.DoubleSide } );
+//     const mesh = new THREE.Mesh( geometry, material );
+//     mesh.position.x = data.x;
+//     mesh.position.y = data.y;
+//     mesh.name = data.n;
+//     scene.add( mesh );
+//     totalGroup.add(mesh)
+//     meshArr.push(mesh)
+// })
+
+
+
+
+   
 
   //door
   // var material1 = new THREE.MeshNormalMaterial();
@@ -124,13 +143,16 @@ fbxLoader.load(
 // object.scale.set(0.1,0.1,0.)
        object.scale.set(5, 3, 5)
        object.position.set(25,-2,-20)
+
+
+       
        scene.add(object)
 //door function
-       mixer = new THREE.AnimationMixer(porta);
-       action = mixer.clipAction(getAnimationByName(object.animations, 'porta|portaAction'));
-       action.clampWhenFinished = true;
-       action.setLoop(THREE.LoopOnce, 1);
-       action.setDuration(1);
+      //  mixer = new THREE.AnimationMixer(porta);
+      //  action = mixer.clipAction(getAnimationByName(object.animations, 'porta|portaAction'));
+      //  action.clampWhenFinished = true;
+      //  action.setLoop(THREE.LoopOnce, 1);
+      //  action.setDuration(1);
     },
     // (xhr) => {
     //     console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
@@ -170,13 +192,6 @@ document.addEventListener('keyup', function(event) {
 }, false);
 
 
-// var e = document.getElementById('object');
-// e.onmouseover = function() {
-//   document.getElementById('object').style.display = 'block';
-// }
-// e.onmouseout = function() {
-//   document.getElementById('object').style.display = 'none';
-// }
 
 
 
@@ -215,6 +230,94 @@ function animate() {
   
   renderer.render(scene,camera);
   requestAnimationFrame(animate);
+}
+
+
+window.addEventListener( 'pointermove', onPointerMove );
+
+  function onPointerMove(event) {
+
+    // alert('rahul');
+
+    pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+	pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+    raycaster.setFromCamera( pointer, camera );
+
+    const intersects = raycaster.intersectObjects( meshArr , false);
+
+    if ( intersects.length > 0 ) {
+
+        if ( INTERSECTED != intersects[0].object ) {
+
+
+            if ( INTERSECTED ){
+
+                INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+            } else{
+
+                INTERSECTED = intersects[ 0 ].object;
+                INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+                INTERSECTED.material.emissive.setHex( 0xff0000 );
+            }
+
+            var pos2D = Get2DPos(INTERSECTED, window.innerWidth, window.innerHeight, camera);
+            console.log("callled",INTERSECTED );
+            console.log(pos2D)
+
+            $("#tooltip").text(INTERSECTED.name)
+            $("#tooltip").css({
+                display: "block",
+                opacity: 0.0
+            });
+            $("#tooltip").css({top : pos2D.y+'px',left : pos2D.x+'px'})
+            $("#tooltip").css({opacity : '1'})
+            $('html,body').css('cursor','pointer');
+
+
+        }
+
+    }else{
+
+
+        if ( INTERSECTED ) {
+            
+            INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+
+        }
+
+        $("#tooltip").css({
+            display: "none"
+        });
+        $('html,body').css('cursor','default');
+
+        INTERSECTED = null;
+
+    }
+   
+
+
+  }
+  function Get2DPos(object, cWidth, cHeight, camera) {
+
+    var vector = new THREE.Vector3();
+
+    var widthHalf = 0.5 * cWidth;
+
+    var heightHalf = 0.5 * cHeight;
+
+    object.updateMatrixWorld();
+
+    vector.setFromMatrixPosition(object.matrixWorld);
+
+    vector.project(camera);
+
+    vector.x = ( vector.x * widthHalf ) + widthHalf;
+
+    vector.y = - ( vector.y * heightHalf ) + heightHalf;
+
+    return {  x: vector.x, y: vector.y };
+
 }
 
 
