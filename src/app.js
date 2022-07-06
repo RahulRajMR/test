@@ -3,12 +3,23 @@ import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls'
 import * as $ from 'jquery'
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader'
 
+// import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
+
 
 // let autoRotate = true;
-const totalGroup = new THREE.Group(); 
-const raycaster = new THREE.Raycaster();
+// const totalGroup = new THREE.Group(); 
+// const raycaster = new THREE.Raycaster();
 
 let scene, camera, renderer;
+
+const totalGroup = new THREE.Group(); 
+
+const meshArr = [];
+const raycaster = new THREE.Raycaster();
+ let INTERSECTED;
+ const pointer = new THREE.Vector2();
+// mousehover interation
+// var raycaster = new THREE.Raycaster();
 
 
 
@@ -24,10 +35,10 @@ function init() {
   document.body.appendChild(renderer.domElement);
 
 
-  var clock;
-		var mixer;
-		var action;
-		var executed = false;
+  // var clock;
+	// 	var mixer;
+	// 	var action;
+	// 	var executed = false;
 
 
   const orbitControl = new OrbitControls( camera, renderer.domElement );
@@ -71,44 +82,23 @@ function init() {
 // })
 
 
-
-
-   
-
-  //door
-  // var material1 = new THREE.MeshNormalMaterial();
-  //   material1.side = THREE.DoubleSide;
-  //    axis = new THREE.Mesh( new THREE.PlaneGeometry( 0.01, 0.6, 0.01 ), material );
-  //   axis.position.set(0.4, 0, .20);
-  //   scene.add( axis );
-
-
-//   var video = document.getElementById('video');
-//   video.src = "./videos/batman.mp4";
-//   video.load();
-//   video.play();
-//  var texture = new THREE.VideoTexture(videoImage);
-//   texture.needsUpdate;
-//   texture.minFilter = THREE.LinearFilter;
-//   texture.magFilter = THREE.LinearFilter;
-//   texture.format = THREE.RGBFormat;
-//   texture.crossOrigin = 'anonymous';
-//  var meshPlace = new THREE.Mesh(
-//   new THREE.PlaneGeometry(USE_WIDTH, USE_HEIGHT , 40),
-//   new THREE.MeshBasicMaterial({ map: texture }),);
-//   scene.add( meshPlace );
-
-
-
-
+ 
 
 //video
 // document.getElementById("myVideo").controls = true;
 const video = document.getElementById( 'video' );
 
+
 video.onloadeddata = function () {
   video.play();
+
+  
+    
+  
 };
+
+
+
 
 const texture = new THREE.VideoTexture( video );
 // videoTexture.needsUpdate = true;
@@ -119,81 +109,233 @@ const material = new THREE.MeshBasicMaterial({ map: texture, side:2 ,
 // videoMaterial.needsUpdate = true;
 
 const mesh = new THREE.Mesh(geometry,material);
-mesh.scale.multiplyScalar(2);
-console.log(mesh);
+//  mesh.scale.multiplyScalar(2);
+ mesh.scale.set(4,4,4);
+//console.log(mesh);
 
-mesh.position.set(-5 , 2, -10);
-
+mesh.position.set(-2 , 1, -30);
+mesh.rotation.set(0,6,0);
+ 
 
 // mesh.position.set(0 , 0, -10);
 
 scene.add(mesh);
 
+ 
+
+window.addEventListener( 'pointermove', onPointerMove );
+
+  function onPointerMove(event) {
+
+    pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+	pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+    raycaster.setFromCamera( pointer, camera );
+
+    console.log(meshArr)
+    const intersects = raycaster.intersectObjects( meshArr)[0];
+
+    // $("#tooltip").css({
+    //     opacity: 0,
+    //     display :'none'
+    // });
+    if(intersects) {
+
+            setTimeout( () => {
+
+              $("#tooltip").text(intersects.object.name)
+              $("#tooltip").css('display','block')
+            //  $("#tooltip").animate({opacity: 1 },200)
+              $("#tooltip").css({opacity : '1'})
+
+            },10)
+          
+           
+            // $("#tooltip").css({top : pos2D.y+'px',left : pos2D.x+'px'})
+            // $("#tooltip").css({opacity : '1'})
+            // $('html,body').css('cursor','pointer');
+   
+    }else{
+
+      $("#tooltip").text("")
+      $("#tooltip").css('display','none')
+    }
+  
+
+
+    
+ 
+    // if ( intersects.length > 0 ) {
+
+    //   console.log("call")
+
+    //     if ( INTERSECTED != intersects.object ) {
+
+
+    //         if ( INTERSECTED ){
+
+    //             INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+    //         } else{
+
+    //             INTERSECTED = intersects[ 0 ].object;
+    //             INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+    //             INTERSECTED.material.emissive.setHex( 0xff0000 );
+    //         }
+
+    //         var pos2D = Get2DPos(INTERSECTED, window.innerWidth, window.innerHeight, camera);
+    //         console.log("callled",INTERSECTED );
+    //         console.log(pos2D)
+
+    //         $("#tooltip").text(INTERSECTED.name)
+    //         $("#tooltip").css({
+    //             display: "block",
+    //             opacity: 0.0
+    //         });
+    //         $("#tooltip").css({top : pos2D.y+'px',left : pos2D.x+'px'})
+    //         $("#tooltip").css({opacity : '1'})
+    //         $('html,body').css('cursor','pointer');
+
+
+    //     }
+
+    // }else{
+
+
+    //     if ( INTERSECTED ) {
+            
+    //         INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+
+    //     }
+
+    //     $("#tooltip").css({
+    //         display: "none"
+    //     });
+    //     $('html,body').css('cursor','default');
+
+    //     INTERSECTED = null;
+
+    // }
+    
 
 
 
+  }
 
+
+  //two dimensional position
+//  fo
 
 
 
 const fbxLoader = new FBXLoader()
 fbxLoader.load(
-    '../src/doorbake4.fbx',
+    '../src/floor.fbx',
     (object) => {
 // object.scale.set(0.1,0.1,0.)
-       object.scale.set(5, 3, 5)
-       object.position.set(25,-2,-20)
+        object.scale.set(10, 10, 10)
+        object.position.set(-3,-10,-20)
 
-
+      //  object.name = 'door';
        
        scene.add(object)
-//door function
-      //  mixer = new THREE.AnimationMixer(porta);
-      //  action = mixer.clipAction(getAnimationByName(object.animations, 'porta|portaAction'));
-      //  action.clampWhenFinished = true;
-      //  action.setLoop(THREE.LoopOnce, 1);
-      //  action.setDuration(1);
+
     },
-    // (xhr) => {
-    //     console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
-    // },
-    // (error) => {
-    //     console.log(error)
-    // }
+   
     
 )
 
+fbxLoader.load(
+  '../src/door1.fbx',
+  (object1) => {
+// object.scale.set(0.1,0.1,0.)
+     object1.scale.set(7, 10, 5)
+     object1.position.set(-6,-10,-40)
+     
+     object1.name = 'door2';
+       
+    
+     scene.add(object1)
+     
+     meshArr.push(object1)
+     
+
+  
+
+  },
+ 
+  
+)
+fbxLoader.load(
+  '../src/door2.fbx',
+  (object2) => {
+// object.scale.set(0.1,0.1,0.)
+     object2.scale.set(7, 10, 5)
+     object2.position.set(-16,-10,-40)
+     
+    //  object2.material.color.set( Math.random() * 0xffffff );
+     scene.add(object2)
+     meshArr.push(object2)
+  },
+ 
+  
+)
+
+fbxLoader.load(
+  '../src/door3.fbx',
+  (object3) => {
+// object.scale.set(0.1,0.1,0.)
+     object3.scale.set(7, 10, 5)
+     object3.position.set(-7,-9,-35)
+    //  object3.rotation.set(0,0,0)
+
+
+     object3.name = 'door';
+       
+     
+     scene.add(object3)
+     meshArr.push(object3)
+
+
+     
+//      var intersects = raycaster.intersectObject(scene, true);
+
+// if (intersects.length > 0) {
+	
+//     var object1 = intersects[0].object1;
+
+//     object1.material.color.set( Math.random() * 0xffffff );
+
+// }
+
+
+
+
+
+  },
+ 
+  
+)
+
+
+// geometryObj.forEach(data => {
+
+//   var color =  "#" + Math.floor(Math.random()*16777215).toString(16);
+//   const geometry = data.obj;
+//   const material = new THREE.MeshPhongMaterial( { color: color, side: THREE.DoubleSide } );
+//   const mesh = new THREE.Mesh( geometry, material );
+//   mesh.position.x = data.x;
+//   mesh.position.y = data.y;
+//   mesh.name = data.n;
+//   scene.add( mesh );
+//   totalGroup.add(mesh)
+//   meshArr.push(mesh)
+  
+// })
+
+
+
+
 //door function
-function render() {
-  var delta = clock.getDelta();
-  if (mixer) {
-    mixer.update(delta);
-  }
-}
-
-function getAnimationByName(arr, name) {
-  for (var i = 0; i < arr.length; i++) {
-    if (arr[i].name == name) {
-      return arr[i];
-    }
-  }
-  return undefined;
-}
-
-document.addEventListener('keyup', function(event) {
-  if (event.keyCode == 65) { // a
-    if (executed) {
-      action.timeScale *= -1;
-    }
-    action.paused = false;
-    action.play();
-    executed = true;
-  }
-}, false);
-
-
-
-
 
 const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6);
 directionalLight.position.set(10, 20, 0); // x, y, z
@@ -213,128 +355,29 @@ controls.maxPolarAngle = Math.PI / 2 + 0.4;
 
 
   for (let i = 0; i < 6; i++)
-     materialArray[i].side = THREE.BackSide;
+   materialArray[i].side = THREE.BackSide;
   let skyboxGeo = new THREE.BoxGeometry( 100, 100, 100);
   let skybox = new THREE.Mesh( skyboxGeo, materialArray, );
 
-
- 
   scene.add( skybox );  
-
- 
 
   animate();
 }
 function animate() {
   // controls.autoRotate = autoRotate;
-  
+
+
   renderer.render(scene,camera);
   requestAnimationFrame(animate);
 }
-
-
-window.addEventListener( 'pointermove', onPointerMove );
-
-  function onPointerMove(event) {
-
-    // alert('rahul');
-
-    pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-	pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-
-    raycaster.setFromCamera( pointer, camera );
-
-    const intersects = raycaster.intersectObjects( meshArr , false);
-
-    if ( intersects.length > 0 ) {
-
-        if ( INTERSECTED != intersects[0].object ) {
-
-
-            if ( INTERSECTED ){
-
-                INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
-            } else{
-
-                INTERSECTED = intersects[ 0 ].object;
-                INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-                INTERSECTED.material.emissive.setHex( 0xff0000 );
-            }
-
-            var pos2D = Get2DPos(INTERSECTED, window.innerWidth, window.innerHeight, camera);
-            console.log("callled",INTERSECTED );
-            console.log(pos2D)
-
-            $("#tooltip").text(INTERSECTED.name)
-            $("#tooltip").css({
-                display: "block",
-                opacity: 0.0
-            });
-            $("#tooltip").css({top : pos2D.y+'px',left : pos2D.x+'px'})
-            $("#tooltip").css({opacity : '1'})
-            $('html,body').css('cursor','pointer');
-
-
-        }
-
-    }else{
-
-
-        if ( INTERSECTED ) {
-            
-            INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
-
-        }
-
-        $("#tooltip").css({
-            display: "none"
-        });
-        $('html,body').css('cursor','default');
-
-        INTERSECTED = null;
-
-    }
-   
-
-
-  }
-  function Get2DPos(object, cWidth, cHeight, camera) {
-
-    var vector = new THREE.Vector3();
-
-    var widthHalf = 0.5 * cWidth;
-
-    var heightHalf = 0.5 * cHeight;
-
-    object.updateMatrixWorld();
-
-    vector.setFromMatrixPosition(object.matrixWorld);
-
-    vector.project(camera);
-
-    vector.x = ( vector.x * widthHalf ) + widthHalf;
-
-    vector.y = - ( vector.y * heightHalf ) + heightHalf;
-
-    return {  x: vector.x, y: vector.y };
-
-}
-
-
-
-
 
 init();
 
 
   
-  
 
 
 
-
-
-  
 
 
 
